@@ -5,17 +5,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import task.aston.banking_app.exceptions.InvalidPinException;
 import task.aston.banking_app.exceptions.WrongPinException;
-import task.aston.banking_app.pojo.dto.WithdrawRequest;
-import task.aston.banking_app.pojo.entity.Account;
 
 @Service
 @AllArgsConstructor
 public class SecurityService {
     PasswordEncoder encoder;
 
-    public void validatePin(WithdrawRequest withdrawRequest, Account account) {
-        String pin = validatePinFormat(withdrawRequest.getPin());
-        if (!encoder.matches(pin, account.getPin())) {
+    public void verifyPin(String pin, String correct) {
+        pin = validatePinFormat(pin);
+        if (!encoder.matches(pin, correct)) {
             throw new WrongPinException();
         }
     }

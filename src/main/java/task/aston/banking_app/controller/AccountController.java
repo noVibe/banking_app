@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import task.aston.banking_app.pojo.dto.*;
 import task.aston.banking_app.service.AccountService;
 
-import java.util.List;
-
 @RestController
 @AllArgsConstructor
 @RequestMapping("/account")
@@ -20,8 +18,8 @@ public class AccountController {
     }
 
     @GetMapping(params = {"pageNumber", "pageSize"})
-    public List<AccountNameBalanceDto> accountsPage(@RequestParam(name = "pageNumber") int pageNumber,
-                                                    @RequestParam(name = "pageSize", required = false, defaultValue = "10") int pageSize) {
+    public AccountsPageDto accountsPage(@RequestParam(name = "pageNumber") int pageNumber,
+                                            @RequestParam(name = "pageSize", required = false, defaultValue = "10") int pageSize) {
         return accountService.getAccounts(pageNumber, pageSize);
     }
 

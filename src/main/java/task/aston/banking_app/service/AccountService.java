@@ -37,9 +37,11 @@ public class AccountService {
     }
 
     @Transactional(readOnly = true)
-    public List<AccountNameBalanceDto> getAccounts(int pageNumber, int pageSize) {
+    public AccountsPageDto getAccounts(int pageNumber, int pageSize) {
         Pageable page = PageRequest.of(pageNumber, pageSize);
-        return accountRepository.getPageOfNameBalanceDto(page);
+        long totalAmount = accountRepository.count();
+        List<AccountNameBalanceDto> list = accountRepository.getPageOfNameBalanceDto(page);
+        return new AccountsPageDto(totalAmount, list);
     }
 
     @Transactional
@@ -56,7 +58,7 @@ public class AccountService {
     public AccountNameBalanceDto withdraw(WithdrawRequest withdrawRequest) {
         Account account = accountRepository.findById(withdrawRequest.getFromAccountId())
                 .orElseThrow(() -> new AccountNotFoundException(withdrawRequest.getFromAccountId()));
-        securityService.validatePin(withdrawRequest, account);
+        securityService.verifyPin(withdrawRequest.getPin(), account.getPin());
         long currencyAmount = withdrawRequest.getCurrencyAmount();
         long balance = account.getBalance();
         if (balance < currencyAmount) {
