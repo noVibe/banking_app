@@ -6,10 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import task.aston.banking_app.exceptions.AccountNotFoundException;
+import task.aston.banking_app.exceptions.NameTakenException;
+import task.aston.banking_app.exceptions.NotEnoughFundsException;
 import task.aston.banking_app.mapper.Mapper;
 import task.aston.banking_app.pojo.dto.AccountNameBalanceDto;
 import task.aston.banking_app.pojo.dto.AccountsPageDto;
-import task.aston.banking_app.pojo.dto.NewAccountDto;
 import task.aston.banking_app.pojo.entity.Account;
 import task.aston.banking_app.repository.AccountRepository;
 
@@ -18,8 +20,8 @@ import java.util.Optional;
 
 import static data_preparation.PreparedData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,26 +38,25 @@ class AccountServiceTest {
     AccountService out;
 
     @Test
-    void createAccount() {
-        NewAccountDto dto = new NewAccountDto("5555", "name");
+    void createAccount_success() {
         Account account = new Account();
         account.setId(1);
-        account.setPin(dto.getPin());
-        account.setName(dto.getName());
+        account.setPin(NEW_ACCOUNT_DTO.getPin());
+        account.setName(NEW_ACCOUNT_DTO.getName());
         long expected = account.getId();
         when(accountRepository.existsByName(anyString()))
                 .thenReturn(false);
         when(securityService.validatePinFormat(anyString()))
                 .thenReturn(account.getPin());
-        when(mapper.toAccount(dto))
+        when(mapper.toAccount(NEW_ACCOUNT_DTO))
                 .thenReturn(account);
         when(accountRepository.save(account))
                 .thenReturn(account);
-        assertEquals(out.createAccount(dto), expected);
+        assertEquals(out.createAccount(NEW_ACCOUNT_DTO), expected);
     }
 
     @Test
-    void getAccounts() {
+    void getAccounts_success() {
         long totalCount = NAME_BALANCE_DTOS.size();
         int pageNumber = 0;
         int pageSize = 10;
@@ -69,7 +70,7 @@ class AccountServiceTest {
     }
 
     @Test
-    void deposit() {
+    void deposit_success() {
         AccountNameBalanceDto result =
                 new AccountNameBalanceDto(ACCOUNT.getName(),
                         ACCOUNT.getBalance() + DEPOSIT_REQUEST.getCurrencyAmount());
@@ -80,11 +81,11 @@ class AccountServiceTest {
         when(mapper.fromAccount(ACCOUNT))
                 .thenReturn(result);
 
-        assertEquals(out.withdraw(WITHDRAW_REQUEST), result);
+        assertEquals(out.deposit(DEPOSIT_REQUEST), result);
     }
 
     @Test
-    void withdraw() {
+    void withdraw_success() {
         AccountNameBalanceDto result =
                 new AccountNameBalanceDto(ACCOUNT.getName(),
                         ACCOUNT.getBalance() - WITHDRAW_REQUEST.getCurrencyAmount());
@@ -96,6 +97,30 @@ class AccountServiceTest {
                 .thenReturn(result);
 
         assertEquals(out.withdraw(WITHDRAW_REQUEST), result);
+    }
+
+    @Test
+    void fail_not_found() {
+        when(accountRepository.findById(anyLong()))
+                .thenReturn(Optional.empty());
+        assertThrows(AccountNotFoundException.class, () -> out.withdraw(WITHDRAW_REQUEST));
+        assertThrows(AccountNotFoundException.class, () -> out.deposit(DEPOSIT_REQUEST));
+    }
+
+    @Test
+    void fail_name_already_taken() {
+        when(accountRepository.existsByName(anyString()))
+                .thenReturn(true);
+        assertThrows(NameTakenException.class, () -> out.createAccount(NEW_ACCOUNT_DTO));
+    }
+
+    @Test
+    void fail_not_enough_funds() {
+        Account poorAccount = ACCOUNT;
+        poorAccount.setBalance(0);
+        when(accountRepository.findById(poorAccount.getId()))
+                .thenReturn(Optional.of(poorAccount));
+        assertThrows(NotEnoughFundsException.class, () -> out.withdraw(WITHDRAW_REQUEST));
     }
 
 }

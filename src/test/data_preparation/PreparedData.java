@@ -2,9 +2,7 @@ package data_preparation;
 
 import com.github.javafaker.Faker;
 import com.github.javafaker.Name;
-import task.aston.banking_app.pojo.dto.AccountNameBalanceDto;
-import task.aston.banking_app.pojo.dto.DepositRequest;
-import task.aston.banking_app.pojo.dto.WithdrawRequest;
+import task.aston.banking_app.pojo.dto.*;
 import task.aston.banking_app.pojo.entity.Account;
 
 import java.util.List;
@@ -18,6 +16,9 @@ public class PreparedData {
     public static final Account ACCOUNT = prepareAccount();
     public static final WithdrawRequest WITHDRAW_REQUEST = prepareWithdraw();
     public static final DepositRequest DEPOSIT_REQUEST = prepareDeposit();
+    public static final TransferRequest TRANSFER_REQUEST = prepareTransfer();
+    public static final NewAccountDto NEW_ACCOUNT_DTO = new NewAccountDto("5555", "name");
+
 
     public static List<AccountNameBalanceDto> getPageOfNameBalanceDto(int pageNumber, int pageSize) {
         return NAME_BALANCE_DTOS.stream()
@@ -48,5 +49,7 @@ public class PreparedData {
     private static DepositRequest prepareDeposit() {
         return new DepositRequest(ACCOUNT.getId(), 100);
     }
-
+    private static TransferRequest prepareTransfer() {
+        return new TransferRequest(ACCOUNT.getId(), 1, ACCOUNT.getPin(), 100);
+    }
 }
