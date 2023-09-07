@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import task.aston.banking_app.exceptions.AccountNotFoundException;
 import task.aston.banking_app.exceptions.NameTakenException;
 import task.aston.banking_app.exceptions.NotEnoughFundsException;
+import task.aston.banking_app.exceptions.UnexpectedIdMatchingException;
 import task.aston.banking_app.mapper.Mapper;
 import task.aston.banking_app.pojo.dto.*;
 import task.aston.banking_app.pojo.entity.Account;
@@ -23,7 +24,7 @@ public class AccountService {
     private final SecurityService securityService;
 
     @Transactional
-    public long createAccount(NewAccountDto newAccountDto) {
+    public String createAccount(NewAccountDto newAccountDto) {
         String name = newAccountDto.getName();
         if (accountRepository.existsByName(name)) {
             throw new NameTakenException(name);
@@ -33,7 +34,7 @@ public class AccountService {
         newAccountDto.setPin(securityService.encodePin(pin));
         Account account = mapper.toAccount(newAccountDto);
         accountRepository.save(account);
-        return account.getId();
+        return String.valueOf(account.getId());
     }
 
     @Transactional(readOnly = true)
@@ -71,6 +72,9 @@ public class AccountService {
 
     @Transactional
     public void transfer(TransferRequest transferRequest) {
+        if (transferRequest.getFromAccountId() == transferRequest.getToAccountId()) {
+            throw new UnexpectedIdMatchingException("Source and goal accounts can't match");
+        }
         withdraw(mapper.fromTransferToWithdraw(transferRequest));
         deposit(mapper.fromTransferToDeposit(transferRequest));
     }

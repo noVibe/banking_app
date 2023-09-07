@@ -16,7 +16,6 @@ public class PreparedData {
     public static final Account ACCOUNT = prepareAccount();
     public static final WithdrawRequest WITHDRAW_REQUEST = prepareWithdraw();
     public static final DepositRequest DEPOSIT_REQUEST = prepareDeposit();
-    public static final TransferRequest TRANSFER_REQUEST = prepareTransfer();
     public static final NewAccountDto NEW_ACCOUNT_DTO = new NewAccountDto("5555", "name");
 
 
@@ -49,7 +48,5 @@ public class PreparedData {
     private static DepositRequest prepareDeposit() {
         return new DepositRequest(ACCOUNT.getId(), 100);
     }
-    private static TransferRequest prepareTransfer() {
-        return new TransferRequest(ACCOUNT.getId(), 1, ACCOUNT.getPin(), 100);
-    }
+
 }

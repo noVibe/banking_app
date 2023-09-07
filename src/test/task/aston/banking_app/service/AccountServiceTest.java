@@ -9,9 +9,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import task.aston.banking_app.exceptions.AccountNotFoundException;
 import task.aston.banking_app.exceptions.NameTakenException;
 import task.aston.banking_app.exceptions.NotEnoughFundsException;
+import task.aston.banking_app.exceptions.UnexpectedIdMatchingException;
 import task.aston.banking_app.mapper.Mapper;
 import task.aston.banking_app.pojo.dto.AccountNameBalanceDto;
 import task.aston.banking_app.pojo.dto.AccountsPageDto;
+import task.aston.banking_app.pojo.dto.TransferRequest;
 import task.aston.banking_app.pojo.entity.Account;
 import task.aston.banking_app.repository.AccountRepository;
 
@@ -43,7 +45,7 @@ class AccountServiceTest {
         account.setId(1);
         account.setPin(NEW_ACCOUNT_DTO.getPin());
         account.setName(NEW_ACCOUNT_DTO.getName());
-        long expected = account.getId();
+        String expected = String.valueOf(account.getId());
         when(accountRepository.existsByName(anyString()))
                 .thenReturn(false);
         when(securityService.validatePinFormat(anyString()))
@@ -100,7 +102,7 @@ class AccountServiceTest {
     }
 
     @Test
-    void fail_not_found() {
+    void not_found_exception() {
         when(accountRepository.findById(anyLong()))
                 .thenReturn(Optional.empty());
         assertThrows(AccountNotFoundException.class, () -> out.withdraw(WITHDRAW_REQUEST));
@@ -108,19 +110,25 @@ class AccountServiceTest {
     }
 
     @Test
-    void fail_name_already_taken() {
+    void name_already_taken_exception() {
         when(accountRepository.existsByName(anyString()))
                 .thenReturn(true);
         assertThrows(NameTakenException.class, () -> out.createAccount(NEW_ACCOUNT_DTO));
     }
 
     @Test
-    void fail_not_enough_funds() {
-        Account poorAccount = ACCOUNT;
+    void not_enough_funds_exception() {
+        Account poorAccount = new Account();
         poorAccount.setBalance(0);
         when(accountRepository.findById(poorAccount.getId()))
                 .thenReturn(Optional.of(poorAccount));
         assertThrows(NotEnoughFundsException.class, () -> out.withdraw(WITHDRAW_REQUEST));
+    }
+
+    @Test
+    void id_conflict_on_transfer_exception() {
+        assertThrows(UnexpectedIdMatchingException.class,
+                () -> out.transfer(new TransferRequest(1,1, "1234", 100)));
     }
 
 }
