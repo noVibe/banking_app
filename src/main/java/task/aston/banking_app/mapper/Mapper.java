@@ -7,7 +7,8 @@ import task.aston.banking_app.pojo.entity.Account;
 @org.mapstruct.Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface Mapper {
     Account toAccount(NewAccountDto newAccountDto);
-    AccountNameBalanceDto fromAccount(Account account);
+    AccountNameBalanceDto nameBalanceFromAccount(Account account);
+    CreatedAccountDto createdFromAccount(Account account);
     WithdrawRequest fromTransferToWithdraw(TransferRequest transferRequest);
     DepositRequest fromTransferToDeposit(TransferRequest depositRequest);
 }

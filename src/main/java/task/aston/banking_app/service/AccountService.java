@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import task.aston.banking_app.exceptions.AccountNotFoundException;
 import task.aston.banking_app.exceptions.NameTakenException;
 import task.aston.banking_app.exceptions.NotEnoughFundsException;
+import task.aston.banking_app.exceptions.UnexpectedIdMatchingException;
 import task.aston.banking_app.mapper.Mapper;
 import task.aston.banking_app.pojo.dto.*;
 import task.aston.banking_app.pojo.entity.Account;
@@ -23,23 +24,24 @@ public class AccountService {
     private final SecurityService securityService;
 
     @Transactional
-    public long createAccount(NewAccountDto newAccountDto) {
+    public CreatedAccountDto createAccount(NewAccountDto newAccountDto) {
         String name = newAccountDto.getName();
         if (accountRepository.existsByName(name)) {
             throw new NameTakenException(name);
         }
         String pin = newAccountDto.getPin();
-        securityService.validatePinFormat(pin);
         newAccountDto.setPin(securityService.encodePin(pin));
         Account account = mapper.toAccount(newAccountDto);
         accountRepository.save(account);
-        return account.getId();
+        return mapper.createdFromAccount(account);
     }
 
     @Transactional(readOnly = true)
-    public List<AccountNameBalanceDto> getAccounts(int pageNumber, int pageSize) {
+    public AccountsPageDto getAccounts(int pageNumber, int pageSize) {
         Pageable page = PageRequest.of(pageNumber, pageSize);
-        return accountRepository.getPageOfNameBalanceDto(page);
+        long totalAmount = accountRepository.count();
+        List<AccountNameBalanceDto> list = accountRepository.getPageOfNameBalanceDto(page);
+        return new AccountsPageDto(totalAmount, list);
     }
 
     @Transactional
@@ -49,14 +51,14 @@ public class AccountService {
                 .orElseThrow(() -> new AccountNotFoundException(depositRequest.getToAccountId()));
         account.deposit(depositRequest.getCurrencyAmount());
         accountRepository.save(account);
-        return mapper.fromAccount(account);
+        return mapper.nameBalanceFromAccount(account);
     }
 
     @Transactional
     public AccountNameBalanceDto withdraw(WithdrawRequest withdrawRequest) {
         Account account = accountRepository.findById(withdrawRequest.getFromAccountId())
                 .orElseThrow(() -> new AccountNotFoundException(withdrawRequest.getFromAccountId()));
-        securityService.validatePin(withdrawRequest, account);
+        securityService.verifyPin(withdrawRequest.getPin(), account.getPin());
         long currencyAmount = withdrawRequest.getCurrencyAmount();
         long balance = account.getBalance();
         if (balance < currencyAmount) {
@@ -64,11 +66,14 @@ public class AccountService {
         }
         account.withdraw(currencyAmount);
         accountRepository.save(account);
-        return mapper.fromAccount(account);
+        return mapper.nameBalanceFromAccount(account);
     }
 
     @Transactional
     public void transfer(TransferRequest transferRequest) {
+        if (transferRequest.getFromAccountId() == transferRequest.getToAccountId()) {
+            throw new UnexpectedIdMatchingException("Source and goal accounts can't match");
+        }
         withdraw(mapper.fromTransferToWithdraw(transferRequest));
         deposit(mapper.fromTransferToDeposit(transferRequest));
     }

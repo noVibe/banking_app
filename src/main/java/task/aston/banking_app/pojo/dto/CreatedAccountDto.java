@@ -5,11 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Schema(description = "Contains actual name and balance of account. Sent by server")
+@Schema(description = "Contains name and id of created account. Sent by server")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountNameBalanceDto {
+public class CreatedAccountDto {
     private String name;
-    private long balance;
+    private long id;
 }
