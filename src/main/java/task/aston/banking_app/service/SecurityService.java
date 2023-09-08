@@ -8,14 +8,13 @@ import task.aston.banking_app.exceptions.WrongPinException;
 @Service
 @AllArgsConstructor
 public class SecurityService {
-    PasswordEncoder encoder;
+    private PasswordEncoder encoder;
 
     public void verifyPin(String pin, String correct) {
         if (!encoder.matches(pin, correct)) {
             throw new WrongPinException();
         }
     }
-
 
     public String encodePin(String pin) {
         return encoder.encode(pin);
