@@ -30,7 +30,6 @@ public class AccountService {
             throw new NameTakenException(name);
         }
         String pin = newAccountDto.getPin();
-        securityService.validatePinFormat(pin);
         newAccountDto.setPin(securityService.encodePin(pin));
         Account account = mapper.toAccount(newAccountDto);
         accountRepository.save(account);

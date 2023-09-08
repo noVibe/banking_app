@@ -4,11 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public abstract class BankingUnauthorizedException extends BankingException {
     public BankingUnauthorizedException(String message) {
-        super(message);
+        super(HttpStatus.UNAUTHORIZED, message);
     }
 
-    @Override
-    public HttpStatus getHttpStatus() {
-        return HttpStatus.UNAUTHORIZED;
-    }
 }

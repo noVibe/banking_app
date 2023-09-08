@@ -2,13 +2,9 @@ package task.aston.banking_app.exceptions.abstract_hierarchy;
 
 import org.springframework.http.HttpStatus;
 
-public class BankingNotFoundException extends BankingException{
+public class BankingNotFoundException extends BankingException {
     public BankingNotFoundException(String message) {
-        super(message);
+        super(HttpStatus.NOT_FOUND, message);
     }
 
-    @Override
-    public HttpStatus getHttpStatus() {
-        return HttpStatus.NOT_FOUND;
-    }
 }

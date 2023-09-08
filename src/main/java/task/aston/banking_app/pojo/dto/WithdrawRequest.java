@@ -1,7 +1,7 @@
 package task.aston.banking_app.pojo.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +11,7 @@ import lombok.Data;
 public final class WithdrawRequest {
 
     @Schema(description = "Must be 4 digits", example = "1234")
-    @NotBlank(message = "Pin required")
+    @Pattern(regexp = "\\d{4}", message = "the pin must consist of 4 digits")
     private final String pin;
 
     @Schema(description = "Account id. Must be positive", example = "1")
