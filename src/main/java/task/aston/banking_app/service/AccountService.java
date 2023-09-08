@@ -24,7 +24,7 @@ public class AccountService {
     private final SecurityService securityService;
 
     @Transactional
-    public String createAccount(NewAccountDto newAccountDto) {
+    public CreatedAccountDto createAccount(NewAccountDto newAccountDto) {
         String name = newAccountDto.getName();
         if (accountRepository.existsByName(name)) {
             throw new NameTakenException(name);
@@ -33,7 +33,7 @@ public class AccountService {
         newAccountDto.setPin(securityService.encodePin(pin));
         Account account = mapper.toAccount(newAccountDto);
         accountRepository.save(account);
-        return String.valueOf(account.getId());
+        return mapper.createdFromAccount(account);
     }
 
     @Transactional(readOnly = true)
@@ -51,7 +51,7 @@ public class AccountService {
                 .orElseThrow(() -> new AccountNotFoundException(depositRequest.getToAccountId()));
         account.deposit(depositRequest.getCurrencyAmount());
         accountRepository.save(account);
-        return mapper.fromAccount(account);
+        return mapper.nameBalanceFromAccount(account);
     }
 
     @Transactional
@@ -66,7 +66,7 @@ public class AccountService {
         }
         account.withdraw(currencyAmount);
         accountRepository.save(account);
-        return mapper.fromAccount(account);
+        return mapper.nameBalanceFromAccount(account);
     }
 
     @Transactional

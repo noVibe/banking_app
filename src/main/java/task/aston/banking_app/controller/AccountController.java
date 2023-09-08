@@ -28,8 +28,8 @@ public class AccountController {
             @ApiResponse(responseCode = "400", description = "Invalid pin / input")
     })
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
-    public String createAccount(@Valid @RequestBody NewAccountDto newAccountDto) {
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public CreatedAccountDto createAccount(@Valid @RequestBody NewAccountDto newAccountDto) {
         return accountService.createAccount(newAccountDto);
     }
 

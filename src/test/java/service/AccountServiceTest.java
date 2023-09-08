@@ -1,4 +1,4 @@
-package task.aston.banking_app.service;
+package service;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -16,6 +16,8 @@ import task.aston.banking_app.pojo.dto.AccountsPageDto;
 import task.aston.banking_app.pojo.dto.TransferRequest;
 import task.aston.banking_app.pojo.entity.Account;
 import task.aston.banking_app.repository.AccountRepository;
+import task.aston.banking_app.service.AccountService;
+import task.aston.banking_app.service.SecurityService;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +26,7 @@ import static data_preparation.PreparedData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @RequiredArgsConstructor
@@ -45,16 +47,17 @@ class AccountServiceTest {
         account.setId(1);
         account.setPin(NEW_ACCOUNT_DTO.getPin());
         account.setName(NEW_ACCOUNT_DTO.getName());
-        String expected = String.valueOf(account.getId());
         when(accountRepository.existsByName(anyString()))
                 .thenReturn(false);
-        when(securityService.validatePinFormat(anyString()))
-                .thenReturn(account.getPin());
         when(mapper.toAccount(NEW_ACCOUNT_DTO))
                 .thenReturn(account);
+        when(securityService.encodePin(account.getPin()))
+                .thenReturn("encoded");
         when(accountRepository.save(account))
                 .thenReturn(account);
-        assertEquals(out.createAccount(NEW_ACCOUNT_DTO), expected);
+        when(mapper.createdFromAccount(account))
+                .thenReturn(CREATED_ACCOUNT_DTO);
+        assertEquals(out.createAccount(NEW_ACCOUNT_DTO), CREATED_ACCOUNT_DTO);
     }
 
     @Test
@@ -80,7 +83,7 @@ class AccountServiceTest {
                 .thenReturn(Optional.of(ACCOUNT));
         when(accountRepository.save(ACCOUNT))
                 .thenReturn(ACCOUNT);
-        when(mapper.fromAccount(ACCOUNT))
+        when(mapper.nameBalanceFromAccount(ACCOUNT))
                 .thenReturn(result);
 
         assertEquals(out.deposit(DEPOSIT_REQUEST), result);
@@ -95,10 +98,10 @@ class AccountServiceTest {
                 .thenReturn(Optional.of(ACCOUNT));
         when(accountRepository.save(ACCOUNT))
                 .thenReturn(ACCOUNT);
-        when(mapper.fromAccount(ACCOUNT))
+        when(mapper.nameBalanceFromAccount(ACCOUNT))
                 .thenReturn(result);
-
         assertEquals(out.withdraw(WITHDRAW_REQUEST), result);
+        verify(securityService, only()).verifyPin(anyString(), anyString());
     }
 
     @Test

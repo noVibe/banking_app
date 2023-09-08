@@ -17,6 +17,7 @@ public class PreparedData {
     public static final WithdrawRequest WITHDRAW_REQUEST = prepareWithdraw();
     public static final DepositRequest DEPOSIT_REQUEST = prepareDeposit();
     public static final NewAccountDto NEW_ACCOUNT_DTO = new NewAccountDto("5555", "name");
+    public static final CreatedAccountDto CREATED_ACCOUNT_DTO = new CreatedAccountDto("name", 1);
 
 
     public static List<AccountNameBalanceDto> getPageOfNameBalanceDto(int pageNumber, int pageSize) {
