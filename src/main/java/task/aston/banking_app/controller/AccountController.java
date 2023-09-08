@@ -23,9 +23,13 @@ public class AccountController {
 
     @Operation(summary = "Create new account")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created successfully"),
+            @ApiResponse(responseCode = "201", description = "Created successfully",
+                    content = {@Content(schema = @Schema(implementation = CreatedAccountDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid input / bad request"),
             @ApiResponse(responseCode = "409", description = "Name is already taken"),
-            @ApiResponse(responseCode = "400", description = "Invalid pin / input")
+            @ApiResponse(responseCode = "500", description = "Server error")
+
+
     })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -36,11 +40,9 @@ public class AccountController {
     @Operation(summary = "Get page of account name and balance, total account amount")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Page was sent successfully",
-                    content = {@Content(schema = @Schema(implementation = AccountsPageDto.class),
-                            mediaType = MediaType.APPLICATION_JSON_VALUE)}),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = {@Content(schema = @Schema(nullable = true, implementation = String.class),
-                            mediaType = MediaType.TEXT_PLAIN_VALUE)})
+                    content = {@Content(schema = @Schema(implementation = AccountsPageDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Bad request"),
+            @ApiResponse(responseCode = "500", description = "Server error")
     })
     @GetMapping
     public AccountsPageDto accountsPage(@RequestParam(name = "pageNumber") int pageNumber,
@@ -51,11 +53,11 @@ public class AccountController {
     @Operation(summary = "Withdraw from account by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Withdrawn successfully",
-                    content = {@Content(schema = @Schema(implementation = AccountNameBalanceDto.class),
-                            mediaType = MediaType.APPLICATION_JSON_VALUE)}),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = {@Content(schema = @Schema(nullable = true, implementation = String.class),
-                            mediaType = MediaType.TEXT_PLAIN_VALUE)})
+                    content = {@Content(schema = @Schema(implementation = AccountNameBalanceDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid input / Bad request"),
+            @ApiResponse(responseCode = "401", description = "Wrong pin"),
+            @ApiResponse(responseCode = "404", description = "Account not found"),
+            @ApiResponse(responseCode = "500", description = "Server error")
     })
     @PostMapping(path = "/withdraw", consumes = MediaType.APPLICATION_JSON_VALUE)
     public AccountNameBalanceDto transfer(@Valid @RequestBody WithdrawRequest withdrawRequest) {
@@ -65,11 +67,10 @@ public class AccountController {
     @Operation(summary = "Deposit to account by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Deposited successfully",
-                    content = {@Content(schema = @Schema(implementation = AccountNameBalanceDto.class),
-                            mediaType = MediaType.APPLICATION_JSON_VALUE)}),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = {@Content(schema = @Schema(nullable = true, implementation = String.class),
-                            mediaType = MediaType.TEXT_PLAIN_VALUE)})
+                    content = {@Content(schema = @Schema(implementation = AccountNameBalanceDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid input / Bad request"),
+            @ApiResponse(responseCode = "404", description = "Account not found"),
+            @ApiResponse(responseCode = "500", description = "Server error")
     })
     @PostMapping(path = "/deposit", consumes = MediaType.APPLICATION_JSON_VALUE)
     public AccountNameBalanceDto transfer(@Valid @RequestBody DepositRequest depositRequest) {
@@ -79,12 +80,11 @@ public class AccountController {
     @Operation(summary = "Transfer between two accounts")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Transferred successfully"),
-            @ApiResponse(responseCode = "409", description = "Source and goal id are equal",
-                    content = {@Content(schema = @Schema(nullable = true, implementation = String.class),
-                            mediaType = MediaType.TEXT_PLAIN_VALUE)}),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = {@Content(schema = @Schema(nullable = true, implementation = String.class),
-                            mediaType = MediaType.TEXT_PLAIN_VALUE)})
+            @ApiResponse(responseCode = "400", description = "Invalid input / Bad request"),
+            @ApiResponse(responseCode = "401", description = "Wrong pin"),
+            @ApiResponse(responseCode = "404", description = "At least on account not found"),
+            @ApiResponse(responseCode = "409", description = "Source and goal id are equal"),
+            @ApiResponse(responseCode = "500", description = "Server error")
     })
     @PostMapping(path = "/transfer", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void transfer(@Valid @RequestBody TransferRequest transferRequest) {
