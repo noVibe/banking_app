@@ -32,4 +32,4 @@ docker run -p 8080:8080 banking-app
 - [API interaction via Swagger](http://localhost:8080/swagger-ui/index.html#/)
 - [Direct database access](http://localhost:8080/h2-console/login.jsp?jsessionid=439f71ba29cf6816a3a01b22194cd606)
 > [!NOTE]
-> Mmake sure JDBC URL is set to **jdbc:h2:mem:test**
+> Make sure JDBC URL is set to **jdbc:h2:mem:test**
