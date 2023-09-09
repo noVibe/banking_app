@@ -9,7 +9,7 @@ Pin-codes are hashed before being put in the database.
 - **Spring Web** for REST implementation
 - **Spring JPA, Liquibase, Hibernate** for database interaction
 - **Spring Validation** for DTO checking
-- **Spring Security Crytpto*** for password encoding
+- **Spring Security Crytpto** for password encoding
 - **Mockito, JUnit** for unit testing
 - **JavaFaker** for preparing test data
 - **Springdoc OpenApi, Swagger** for API description 
