@@ -25,7 +25,7 @@ Pin-codes are hashed before being put in the database.
 ```
 docker build -t banking-app -f Dockerfile .
 ```
-  5) Then run the container with the command:
+  4) Then run the container with the command:
 ```
 docker run -p 8080:8080 banking-app
 ```
