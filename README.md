@@ -1,7 +1,7 @@
 # Banking_app
 
 Application allows to manage banking accounts (create, deposit, withdraw, transfer) via REST.
-Every request must pass the validation.
+Every request passes the validation.
 Pin-codes are hashed before being put in the database.
 
 ## Technologies (17 in total)
