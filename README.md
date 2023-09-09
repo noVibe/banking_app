@@ -9,7 +9,7 @@ Pin-codes are hashed before being put in the database.
 - **Spring Web** for REST implementation
 - **Spring JPA, Liquibase, Hibernate** for database interaction
 - **Spring Validation** for DTO checking
-- **Spring Security** Crytpto for password encoding
+- **Spring Security Crytpto*** for password encoding
 - **Mockito, JUnit** for unit testing
 - **JavaFaker** for preparing test data
 - **Springdoc OpenApi, Swagger** for API description 
@@ -30,4 +30,6 @@ docker run -p 8080:8080 banking-app
 ```
 ## Access the running app
 - [API interaction via Swagger](http://localhost:8080/swagger-ui/index.html#/)
-- [Direct database access](http://localhost:8080/h2-console/login.jsp?jsessionid=439f71ba29cf6816a3a01b22194cd606) (make sure JDBC URL is set to **jdbc:h2:mem:test**)
+- [Direct database access](http://localhost:8080/h2-console/login.jsp?jsessionid=439f71ba29cf6816a3a01b22194cd606)
+> [!NOTE]
+> Mmake sure JDBC URL is set to **jdbc:h2:mem:test**
