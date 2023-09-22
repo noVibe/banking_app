@@ -15,7 +15,7 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "name", nullable = false, unique = true)
+    @Column(name = "beneficiary_name", nullable = false)
     private String name;
 
     @Column(name = "pin", nullable = false)

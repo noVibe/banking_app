@@ -4,17 +4,22 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <changeSet id="1" author="vas">
-        <createTable tableName="account">
+        <createTable tableName="transaction_log">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" unique="true" nullable="false"/>
             </column>
-            <column name="beneficiary_name" type="VARCHAR(50)">
+            <column name="operation" type="VARCHAR(10)">
                 <constraints nullable="false"/>
             </column>
-            <column name="pin" type="VARCHAR(200)">
+            <column name="account_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_transaction_log_account" references="account(id)"/>
+            </column>
+            <column name="amount" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="balance" type="BIGINT" defaultValue="0"/>
+            <column name="timestamp" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 </databaseChangeLog>

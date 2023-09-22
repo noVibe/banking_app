@@ -11,7 +11,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import task.aston.banking_app.pojo.dto.*;
+import task.aston.banking_app.pojo.dto.account.AccountIdNameBalanceDto;
+import task.aston.banking_app.pojo.dto.account.AccountsPageDto;
+import task.aston.banking_app.pojo.dto.account.CreatedAccountDto;
+import task.aston.banking_app.pojo.dto.account.NewAccountDto;
+import task.aston.banking_app.pojo.dto.request.DepositRequest;
+import task.aston.banking_app.pojo.dto.request.TransferRequest;
+import task.aston.banking_app.pojo.dto.request.WithdrawRequest;
 import task.aston.banking_app.service.AccountService;
 
 @RestController
@@ -25,7 +31,6 @@ public class AccountController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input / bad request", content = @Content(schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "409", description = "Name is already taken", content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "500", description = "Server error", content = @Content(schema = @Schema(hidden = true)))
     })
     @ResponseStatus(HttpStatus.CREATED)
@@ -34,7 +39,7 @@ public class AccountController {
         return accountService.createAccount(newAccountDto);
     }
 
-    @Operation(summary = "Get page of account name and balance, total account amount")
+    @Operation(summary = "Get page of account id, name and balance, total account amount")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Page was sent successfully"),
             @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(schema = @Schema(hidden = true))),
@@ -55,7 +60,7 @@ public class AccountController {
             @ApiResponse(responseCode = "500", description = "Server error", content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping(path = "/withdraw", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public AccountNameBalanceDto transfer(@Valid @RequestBody WithdrawRequest withdrawRequest) {
+    public AccountIdNameBalanceDto transfer(@Valid @RequestBody WithdrawRequest withdrawRequest) {
         return accountService.withdraw(withdrawRequest);
     }
 
@@ -67,7 +72,7 @@ public class AccountController {
             @ApiResponse(responseCode = "500", description = "Server error", content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping(path = "/deposit", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public AccountNameBalanceDto transfer(@Valid @RequestBody DepositRequest depositRequest) {
+    public AccountIdNameBalanceDto transfer(@Valid @RequestBody DepositRequest depositRequest) {
         return accountService.deposit(depositRequest);
     }
 

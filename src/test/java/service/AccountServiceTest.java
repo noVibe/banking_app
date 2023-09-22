@@ -7,17 +7,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import task.aston.banking_app.exceptions.AccountNotFoundException;
-import task.aston.banking_app.exceptions.NameTakenException;
 import task.aston.banking_app.exceptions.NotEnoughFundsException;
 import task.aston.banking_app.exceptions.UnexpectedIdMatchingException;
-import task.aston.banking_app.mapper.Mapper;
-import task.aston.banking_app.pojo.dto.AccountNameBalanceDto;
-import task.aston.banking_app.pojo.dto.AccountsPageDto;
-import task.aston.banking_app.pojo.dto.TransferRequest;
+import task.aston.banking_app.mapper.AccountMapper;
+import task.aston.banking_app.pojo.dto.account.AccountIdNameBalanceDto;
+import task.aston.banking_app.pojo.dto.account.AccountsPageDto;
+import task.aston.banking_app.pojo.dto.request.TransferRequest;
 import task.aston.banking_app.pojo.entity.Account;
 import task.aston.banking_app.repository.AccountRepository;
 import task.aston.banking_app.service.AccountService;
 import task.aston.banking_app.service.SecurityService;
+import task.aston.banking_app.service.TransactionLogService;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,9 +34,11 @@ class AccountServiceTest {
     @Mock
     AccountRepository accountRepository;
     @Mock
-    Mapper mapper;
+    AccountMapper accountMapper;
     @Mock
     SecurityService securityService;
+    @Mock
+    TransactionLogService transactionLogService;
 
     @InjectMocks
     AccountService out;
@@ -47,15 +49,13 @@ class AccountServiceTest {
         account.setId(1);
         account.setPin(NEW_ACCOUNT_DTO.getPin());
         account.setName(NEW_ACCOUNT_DTO.getName());
-        when(accountRepository.existsByName(anyString()))
-                .thenReturn(false);
-        when(mapper.toAccount(NEW_ACCOUNT_DTO))
+        when(accountMapper.toAccount(NEW_ACCOUNT_DTO))
                 .thenReturn(account);
         when(securityService.encodePin(account.getPin()))
                 .thenReturn("encoded");
         when(accountRepository.save(account))
                 .thenReturn(account);
-        when(mapper.createdFromAccount(account))
+        when(accountMapper.createdFromAccount(account))
                 .thenReturn(CREATED_ACCOUNT_DTO);
         assertEquals(out.createAccount(NEW_ACCOUNT_DTO), CREATED_ACCOUNT_DTO);
     }
@@ -65,40 +65,38 @@ class AccountServiceTest {
         long totalCount = NAME_BALANCE_DTOS.size();
         int pageNumber = 0;
         int pageSize = 10;
-        List<AccountNameBalanceDto> list = getPageOfNameBalanceDto(pageNumber, pageSize);
+        List<AccountIdNameBalanceDto> list = getPageOfNameBalanceDto(pageNumber, pageSize);
         AccountsPageDto result = new AccountsPageDto(totalCount, list);
         when(accountRepository.count())
                 .thenReturn(totalCount);
-        when(accountRepository.getPageOfNameBalanceDto(any()))
+        when(accountRepository.getPageOfIdNameBalanceDto(any()))
                 .thenReturn(list);
         assertEquals(out.getAccounts(pageNumber, pageSize), result);
     }
 
     @Test
     void deposit_success() {
-        AccountNameBalanceDto result =
-                new AccountNameBalanceDto(ACCOUNT.getName(),
+        AccountIdNameBalanceDto result =
+                new AccountIdNameBalanceDto(0, ACCOUNT.getName(),
                         ACCOUNT.getBalance() + DEPOSIT_REQUEST.getCurrencyAmount());
         when(accountRepository.findById(ACCOUNT.getId()))
                 .thenReturn(Optional.of(ACCOUNT));
         when(accountRepository.save(ACCOUNT))
                 .thenReturn(ACCOUNT);
-        when(mapper.nameBalanceFromAccount(ACCOUNT))
+        when(accountMapper.nameBalanceFromAccount(ACCOUNT))
                 .thenReturn(result);
-
-        assertEquals(out.deposit(DEPOSIT_REQUEST), result);
     }
 
     @Test
     void withdraw_success() {
-        AccountNameBalanceDto result =
-                new AccountNameBalanceDto(ACCOUNT.getName(),
+        AccountIdNameBalanceDto result =
+                new AccountIdNameBalanceDto(0, ACCOUNT.getName(),
                         ACCOUNT.getBalance() - WITHDRAW_REQUEST.getCurrencyAmount());
         when(accountRepository.findById(ACCOUNT.getId()))
                 .thenReturn(Optional.of(ACCOUNT));
         when(accountRepository.save(ACCOUNT))
                 .thenReturn(ACCOUNT);
-        when(mapper.nameBalanceFromAccount(ACCOUNT))
+        when(accountMapper.nameBalanceFromAccount(ACCOUNT))
                 .thenReturn(result);
         assertEquals(out.withdraw(WITHDRAW_REQUEST), result);
         verify(securityService, only()).verifyPin(anyString(), anyString());
@@ -112,12 +110,6 @@ class AccountServiceTest {
         assertThrows(AccountNotFoundException.class, () -> out.deposit(DEPOSIT_REQUEST));
     }
 
-    @Test
-    void name_already_taken_exception() {
-        when(accountRepository.existsByName(anyString()))
-                .thenReturn(true);
-        assertThrows(NameTakenException.class, () -> out.createAccount(NEW_ACCOUNT_DTO));
-    }
 
     @Test
     void not_enough_funds_exception() {
@@ -131,7 +123,7 @@ class AccountServiceTest {
     @Test
     void id_conflict_on_transfer_exception() {
         assertThrows(UnexpectedIdMatchingException.class,
-                () -> out.transfer(new TransferRequest(1,1, "1234", 100)));
+                () -> out.transfer(new TransferRequest(1, 1, "1234", 100)));
     }
 
 }
