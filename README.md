@@ -1,7 +1,7 @@
 # Banking_app
 
 Application allows to manage bank accounts (create account, deposit/withdraw/transfer funds) via validated REST requests.
-Pin-codes are hashed before being put in the database.
+Pin-codes are hashed before being put in the database. All transactions are stored.
 
 ## Technologies (17 in total)
 - **H2 database** for in-memory storing
